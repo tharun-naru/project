@@ -1,0 +1,687 @@
+#########################################
+# General
+#########################################
+
+project_name = "speshway"
+
+environment = "prod"
+
+region = "ap-south-1"
+
+#########################################
+# VPC
+#########################################
+
+vpc_cidr = "10.1.0.0/16"
+
+#########################################
+# Public Subnets
+#########################################
+
+public_subnet_cidrs = [
+  "10.1.1.0/24",
+  "10.1.2.0/24"
+
+]
+
+#########################################
+# Private Subnets
+#########################################
+
+private_subnet_cidrs = [
+  "10.1.11.0/24",
+  "10.1.12.0/24"
+
+]
+
+#########################################
+# NAT count
+#########################################
+
+nat_gateway_count = 2
+
+#########################################
+# AZs
+#########################################
+availability_zone_indexes = [1, 2]
+
+############################################
+# Vpc-Endpoint
+############################################
+
+gateway_vpc_endpoints = [
+  "s3"
+]
+
+interface_vpc_endpoints = [
+  "ecr.api",
+  "ecr.dkr",
+  "ec2",
+  "sts",
+  "logs"
+]
+
+vpc_endpoint_ingress_cidrs = [
+  "10.1.0.0/16"
+]
+############################################
+# IAM Configuration
+############################################
+
+iam_policies = {
+  ###########################################
+  # External Dns policy
+  ############################################
+
+  external_dns = {
+
+    description = "ExternalDNS Route53 permissions"
+
+    statements = [
+
+      {
+        sid = "ChangeRecords"
+
+        actions = [
+          "route53:ChangeResourceRecordSets"
+        ]
+
+        resources = [
+          "arn:aws:route53:::hostedzone/*"
+        ]
+      },
+
+      {
+        sid = "ListHostedZones"
+
+        actions = [
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResource"
+        ]
+
+        resources = [
+          "*"
+        ]
+      }
+
+    ]
+  }
+  ###########################################
+  # AWS LB controller
+  ############################################
+  aws_load_balancer_controller = {
+    description = "AWS Load Balancer Controller permissions"
+
+    statements = [
+      {
+        sid = "EC2"
+
+        actions = [
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeInstances",
+          "ec2:DescribeTags",
+          "ec2:DescribeRouteTables",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInternetGateways"
+        ]
+
+        resources = ["*"]
+      },
+
+      {
+        sid = "ELB"
+
+        actions = [
+          "elasticloadbalancing:Describe*",
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:SetIpAddressType",
+          "elasticloadbalancing:SetSecurityGroups",
+          "elasticloadbalancing:SetSubnets",
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyListener",
+          "elasticloadbalancing:CreateRule",
+          "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:ModifyRule",
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:AddTags",
+          "elasticloadbalancing:RemoveTags"
+        ]
+
+        resources = ["*"]
+      },
+
+      {
+        sid = "SecurityGroups"
+
+        actions = [
+          "ec2:CreateSecurityGroup",
+          "ec2:DeleteSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress"
+        ]
+
+        resources = ["*"]
+      },
+
+      {
+        sid = "IAM"
+
+        actions = [
+          "iam:CreateServiceLinkedRole"
+        ]
+
+        resources = ["*"]
+      }
+    ]
+  }
+
+}
+########################################
+# IAM roles
+##########################################
+
+iam_roles = {
+
+  ##########################################
+  # EKS Cluster Role
+  ##########################################
+
+  eks_cluster = {
+
+    name = "speshway-prod-eks-cluster-role"
+
+    description = "IAM role for the Amazon EKS control plane"
+
+    trusted_services = [
+      "eks.amazonaws.com"
+    ]
+
+    managed_policy_arns = [
+      "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+    ]
+
+    custom_policy_documents = {}
+
+    create_instance_profile = false
+
+    tags = {}
+  }
+  ##########################################
+  # EKS Managed Node Role
+  ##########################################
+
+  eks_node = {
+
+    name = "speshway-prod-eks-node-role"
+
+    description = "IAM role for Amazon EKS managed worker nodes"
+
+    trusted_services = [
+      "ec2.amazonaws.com"
+    ]
+
+    managed_policy_arns = [
+      "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+      "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly",
+      "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+    ]
+
+    custom_policy_documents = {}
+
+    create_instance_profile = false
+
+    tags = {}
+  }
+
+}
+
+
+
+############################################
+# KMS
+############################################
+
+kms_keys = {
+
+  ecr = {
+
+    description = "KMS key for ECR repositories"
+
+    alias = "alias/speshway-prod-ecr"
+
+    administrators = [
+      "arn:aws:iam::594486941106:role/Terraform_Execution_Role"
+    ]
+
+    users = []
+
+  }
+  eks = {
+
+    description = "KMS key for EKS Kubernetes secret encryption"
+
+    alias = "alias/speshway-prod-eks"
+
+    administrators = [
+
+      "arn:aws:iam::594486941106:role/Terraform_Execution_Role"
+
+    ]
+
+    users = []
+
+  }
+  rds = {
+
+    description = "KMS key for RDS secret encryption"
+
+    alias = "alias/speshway-prod-rds"
+
+    administrators = [
+
+      "arn:aws:iam::594486941106:role/Terraform_Execution_Role"
+
+    ]
+
+    users = []
+
+  }
+
+
+}
+
+############################################
+# ECR
+############################################
+
+ecr_repositories = {
+
+  frontend = {
+
+    image_tag_mutability = "IMMUTABLE"
+
+    encryption_type = "KMS"
+
+    lifecycle = {
+
+      enabled = true
+
+      max_image_count = 30
+
+      untagged_image_days = 14
+
+    }
+
+  }
+
+  backend = {
+
+    image_tag_mutability = "IMMUTABLE"
+
+    encryption_type = "KMS"
+
+    lifecycle = {
+
+      enabled = true
+
+      max_image_count = 50
+
+      untagged_image_days = 14
+
+    }
+
+  }
+
+}
+############################################
+# EKS
+############################################
+
+eks_cluster_version = "1.31"
+
+
+endpoint_private_access = true
+
+endpoint_public_access = true
+
+public_access_cidrs = ["15.252.142.10/32"]
+
+eks_node_groups = {
+
+  system = {
+
+    instance_types = [
+
+      "t3.medium"
+
+    ]
+
+    capacity_type = "ON_DEMAND"
+
+    min_size = 3
+
+    max_size = 4
+
+    desired_size = 3
+
+    disk_size = 50
+
+    labels = {
+
+      workload = "system"
+
+    }
+
+    use_launch_template = true
+
+  }
+
+}
+
+launch_templates = {
+  system = {
+    root_volume_size              = 50
+    root_volume_type              = "gp3"
+    delete_on_termination         = true
+    encrypted                     = true
+    additional_security_group_ids = []
+  }
+}
+eks_access_entries = {
+  terraform = {
+    principal_arn = "arn:aws:iam::179897609830:role/Terraform-Execution-role"
+
+    policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+    access_scope = {
+      type = "cluster"
+    }
+  }
+}
+
+eks_irsa_roles = {
+
+  vpc-cni = {
+
+    namespace = "kube-system"
+
+    service_account = "aws-node"
+
+    policy_arns = [
+      "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+    ]
+  }
+
+  aws-ebs-csi-driver = {
+
+    namespace = "kube-system"
+
+    service_account = "ebs-csi-controller-sa"
+
+    policy_arns = [
+      "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+    ]
+  }
+
+  aws-load-balancer-controller = {
+
+    namespace = "kube-system"
+
+    service_account = "aws-load-balancer-controller"
+
+    policy_names = [
+
+      "aws_load_balancer_controller"
+
+    ]
+
+  }
+  external-dns = {
+
+    namespace = "external-dns"
+
+    service_account = "external-dns"
+
+    policy_names = [
+
+      "external_dns"
+
+    ]
+
+  }
+}
+
+addons = {
+
+  ##########################################
+  # EKS Managed Add-ons
+  ##########################################
+
+  vpc-cni = {
+
+    type = "eks"
+
+    irsa_role = "vpc-cni"
+
+  }
+
+  coredns = {
+
+    type = "eks"
+
+  }
+
+  kube-proxy = {
+
+    type = "eks"
+
+  }
+
+  aws-ebs-csi-driver = {
+
+    type = "eks"
+
+    irsa_role = "aws-ebs-csi-driver"
+
+  }
+
+  ##########################################
+  # Helm Add-ons
+  ##########################################
+
+  metrics-server = {
+
+    type = "helm"
+
+    namespace = "kube-system"
+
+    repository = "https://kubernetes-sigs.github.io/metrics-server"
+
+    chart = "metrics-server"
+
+  }
+
+  cert-manager = {
+
+    type = "helm"
+
+    namespace = "cert-manager"
+
+    repository = "https://charts.jetstack.io"
+
+    chart = "cert-manager"
+
+    values = {
+
+      installCRDs = true
+
+    }
+
+  }
+
+  aws-load-balancer-controller = {
+
+    type = "helm"
+
+    irsa_role = "aws-load-balancer-controller"
+
+    namespace = "kube-system"
+
+    repository = "https://aws.github.io/eks-charts"
+
+    chart = "aws-load-balancer-controller"
+
+    set = {
+
+      clusterName = "speshway-prod-eks"
+
+      region = "ap-south-1"
+
+      vpcId = "vpc-0179f9c484adce8c0"
+
+    }
+
+  }
+  external-dns = {
+
+    type = "helm"
+
+    irsa_role = "external-dns"
+
+    namespace = "external-dns"
+
+    repository = "https://kubernetes-sigs.github.io/external-dns"
+
+    chart = "external-dns"
+
+    set = {
+
+      provider = "aws"
+
+      policy = "sync"
+
+      registry = "txt"
+
+      txtOwnerId = "speshway-test"
+
+      "serviceAccount.name" = "external-dns"
+
+    }
+
+  }
+
+
+}
+
+enable_karpenter = false
+
+karpenter_version = "1.14.0"
+
+karpenter_node_classes = {
+
+  default = {
+
+    ami_family = "AL2023"
+    ami_alias  = "al2023@latest"
+  }
+
+}
+
+karpenter_node_pools = {
+
+  general = {
+
+    node_class = "default"
+
+    instance_families = [
+
+      "m6i",
+
+      "c6i"
+
+    ]
+
+    capacity_types = [
+
+      "spot",
+
+      "on-demand"
+
+    ]
+
+    cpu_limit = "200"
+
+    memory_limit = "400Gi"
+
+    consolidation_policy = "WhenEmptyOrUnderutilized"
+
+    expire_after = "720h"
+
+  }
+}
+
+cluster_log_types = [
+
+  "api",
+
+  "audit"
+
+]
+
+cluster_log_retention_in_days = 30
+
+cluster_log_kms_key_arn = null
+############################################
+# RDS
+############################################
+
+rds = {
+
+  identifier = "speshway-prod-rds"
+
+  engine = "postgres"
+
+  engine_version = "16"
+
+  parameter_group_family = "postgres16"
+
+  instance_class = "db.t3.micro"
+
+  allocated_storage = 20
+
+  storage_type = "gp3"
+
+  storage_encrypted = true
+
+  database_name = "speshway"
+
+  master_username = "speshwayadmin"
+
+  manage_master_user_password = true
+
+  publicly_accessible = false
+
+  multi_az = false
+
+  backup_retention_period = 7
+
+  backup_window = "03:00-04:00"
+
+  maintenance_window = "sun:04:00-sun:05:00"
+
+  deletion_protection = false
+
+  skip_final_snapshot = true
+}
