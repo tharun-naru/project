@@ -207,3 +207,91 @@ output "rds_master_user_secret_arn" {
 
   value = module.rds.master_user_secret_arn
 }
+# =========================================================
+# Jenkins
+# =========================================================
+
+output "jenkins_instance_id" {
+  description = "Jenkins EC2 instance ID"
+  value       = module.jenkins.instance_id
+}
+
+output "jenkins_private_ip" {
+  description = "Jenkins private IP"
+  value       = module.jenkins.private_ip
+}
+
+output "jenkins_security_group_id" {
+  description = "Jenkins security group ID"
+  value       = module.jenkins.security_group_id
+}
+
+output "jenkins_data_volume_id" {
+  description = "Jenkins persistent EBS volume ID"
+  value       = module.jenkins.data_volume_id
+}
+
+output "jenkins_iam_policy_arn" {
+  description = "Jenkins service-specific IAM policy ARN"
+  value       = module.jenkins.iam_policy_arn
+}
+
+
+# =========================================================
+# Nexus
+# =========================================================
+
+output "nexus_instance_id" {
+  description = "Nexus EC2 instance ID"
+  value       = module.nexus.instance_id
+}
+
+output "nexus_private_ip" {
+  description = "Nexus private IP"
+  value       = module.nexus.private_ip
+}
+
+output "nexus_security_group_id" {
+  description = "Nexus security group ID"
+  value       = module.nexus.security_group_id
+}
+
+output "nexus_data_volume_id" {
+  description = "Nexus persistent EBS volume ID"
+  value       = module.nexus.data_volume_id
+}
+
+output "nexus_iam_policy_arn" {
+  description = "Nexus service-specific IAM policy ARN"
+  value       = module.nexus.iam_policy_arn
+}
+
+
+# =========================================================
+# SonarQube
+# =========================================================
+
+output "sonarqube_instance_id" {
+  description = "SonarQube EC2 instance ID"
+  value       = module.sonarqube.instance_id
+}
+
+output "sonarqube_private_ip" {
+  description = "SonarQube private IP"
+  value       = module.sonarqube.private_ip
+}
+
+output "sonarqube_security_group_id" {
+  description = "SonarQube security group ID"
+  value       = module.sonarqube.security_group_id
+}
+
+output "sonarqube_data_volume_ids" {
+  description = "Persistent EBS volume IDs for SonarQube and PostgreSQL"
+  value       = module.sonarqube.data_volume_ids
+}
+
+output "sonarqube_iam_policy_arn" {
+  description = "SonarQube service-specific IAM policy ARN"
+  value       = module.sonarqube.iam_policy_arn
+}

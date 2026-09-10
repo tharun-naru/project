@@ -118,6 +118,7 @@ iam_policies = {
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeInstances",
           "ec2:DescribeTags",
+          "ec2:CreateTags",
           "ec2:DescribeRouteTables",
           "ec2:DescribeAvailabilityZones",
           "ec2:DescribeInternetGateways"
@@ -228,6 +229,51 @@ iam_roles = {
     ]
 
   }
+  jenkins = {
+    name = "speshway-test-jenkins-role"
+
+    trusted_services = [
+      "ec2.amazonaws.com"
+    ]
+
+    managed_policy_arns = [
+      "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+      "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+    ]
+
+    create_instance_profile = true
+  }
+
+  nexus = {
+    name = "speshway-test-nexus-role"
+
+    trusted_services = [
+      "ec2.amazonaws.com"
+    ]
+
+    managed_policy_arns = [
+      "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+      "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+    ]
+
+    create_instance_profile = true
+  }
+
+  sonarqube = {
+    name = "speshway-test-sonarqube-role"
+
+    trusted_services = [
+      "ec2.amazonaws.com"
+    ]
+
+    managed_policy_arns = [
+      "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+      "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+      "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+    ]
+
+    create_instance_profile = true
+  }
 }
 ############################################
 # KMS
@@ -284,42 +330,6 @@ kms_keys = {
 
 ecr_repositories = {
 
-  frontend = {
-
-    image_tag_mutability = "IMMUTABLE"
-
-    encryption_type = "KMS"
-
-    lifecycle = {
-
-      enabled = true
-
-      max_image_count = 30
-
-      untagged_image_days = 14
-
-    }
-
-  }
-
-  backend = {
-
-    image_tag_mutability = "IMMUTABLE"
-
-    encryption_type = "KMS"
-
-    lifecycle = {
-
-      enabled = true
-
-      max_image_count = 50
-
-      untagged_image_days = 14
-
-    }
-
-  }
-
 }
 ############################################
 # EKS
@@ -331,7 +341,7 @@ endpoint_private_access = true
 
 endpoint_public_access = true
 
-public_access_cidrs = ["15.252.142.10/32"]
+public_access_cidrs = ["15.252.142.10/32", "3.108.217.124/32"]
 
 
 eks_node_groups = {
@@ -346,11 +356,11 @@ eks_node_groups = {
 
     capacity_type = "ON_DEMAND"
 
-    min_size = 2
+    min_size = 0
 
-    max_size = 3
+    max_size = 2
 
-    desired_size = 2
+    desired_size = 0
 
     disk_size = 50
 
@@ -385,6 +395,18 @@ eks_access_entries = {
       type       = "cluster"
       namespaces = []
     }
+    type = "STANDARD"
+  }
+  eks_user = {
+    principal_arn = "arn:aws:iam::179897609830:user/eks-user"
+
+    policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+    access_scope = {
+      type       = "cluster"
+      namespaces = []
+    }
+
     type = "STANDARD"
   }
 }
@@ -509,29 +531,6 @@ addons = {
 
   }
 
-  aws-load-balancer-controller = {
-
-    type = "helm"
-
-    irsa_role = "aws-load-balancer-controller"
-
-    namespace = "kube-system"
-
-    repository = "https://aws.github.io/eks-charts"
-
-    chart = "aws-load-balancer-controller"
-
-    set = {
-
-      clusterName = "speshway-test-eks"
-
-      region = "ap-south-1"
-
-      vpcId = "vpc-09445c3aa909b9d78"
-
-    }
-
-  }
   external-dns = {
 
     type = "helm"
@@ -577,18 +576,25 @@ cluster_log_retention_in_days = 30
 
 cluster_log_kms_key_arn = null
 ############################################
+# LB controller
+############################################
+load_balancer_controller_helm_repository = "https://aws.github.io/eks-charts"
+
+load_balancer_controller_chart_name = "aws-load-balancer-controller"
+
+aws_load_balancer_controller_chart_version = "3.5.0"
+############################################
 # RDS
 ############################################
-
 rds = {
 
-  identifier = "speshway-test-rds"
+  identifier = "crm-test-rds"
 
-  engine = "postgres"
+  engine = "mysql"
 
-  engine_version = "16"
+  engine_version = "8.0"
 
-  parameter_group_family = "postgres16"
+  parameter_group_family = "mysql8.0"
 
   instance_class = "db.t3.micro"
 
@@ -598,9 +604,9 @@ rds = {
 
   storage_encrypted = true
 
-  database_name = "speshway"
+  database_name = "crm"
 
-  master_username = "speshwayadmin"
+  master_username = "crmadmin"
 
   manage_master_user_password = true
 
@@ -618,3 +624,64 @@ rds = {
 
   skip_final_snapshot = true
 }
+
+############################################
+# Platform
+############################################
+# =========================================================
+# JENKINS
+# =========================================================
+
+jenkins_instance_type = "t3.medium"
+
+jenkins_root_volume_size = 20
+
+jenkins_data_volume_size = 50
+
+jenkins_data_volume_type = "gp3"
+
+
+# =========================================================
+# NEXUS
+# =========================================================
+
+nexus_instance_type = "t3.medium"
+
+nexus_root_volume_size = 20
+
+nexus_data_volume_size = 100
+
+nexus_data_volume_type = "gp3"
+
+
+# =========================================================
+# SONARQUBE
+# =========================================================
+
+sonarqube_instance_type = "t3.medium"
+
+sonarqube_root_volume_size = 20
+
+sonarqube_data_volumes = {
+  sonarqube = {
+    size        = 50
+    type        = "gp3"
+    encrypted   = true
+    device_name = "/dev/sdf"
+  }
+
+  postgres = {
+    size        = 30
+    type        = "gp3"
+    encrypted   = true
+    device_name = "/dev/sdg"
+  }
+}
+
+
+# =========================================================
+# MONITORING
+# =========================================================
+
+enable_detailed_monitoring = false
+

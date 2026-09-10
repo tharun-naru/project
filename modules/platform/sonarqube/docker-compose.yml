@@ -1,0 +1,71 @@
+services:
+
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    container_name: ${POSTGRES_CONTAINER}
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT}"
+
+    secrets:
+      - postgres_password
+
+    volumes:
+      - ${POSTGRES_DATA_PATH}:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+        ]
+      interval: ${POSTGRES_HEALTH_INTERVAL}
+      timeout: ${POSTGRES_HEALTH_TIMEOUT}
+      retries: ${POSTGRES_HEALTH_RETRIES}
+      start_period: ${POSTGRES_HEALTH_START_PERIOD}
+
+    networks:
+      - sonarqube
+
+
+  sonarqube:
+    image: ${SONARQUBE_IMAGE}
+    container_name: ${SONARQUBE_CONTAINER}
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+      SONAR_JDBC_USERNAME: ${POSTGRES_USER}
+      SONAR_JDBC_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "${SONARQUBE_PORT}:${SONARQUBE_PORT}"
+
+    volumes:
+      - ${SONARQUBE_DATA_PATH}/data:/opt/sonarqube/data
+      - ${SONARQUBE_DATA_PATH}/extensions:/opt/sonarqube/extensions
+      - ${SONARQUBE_DATA_PATH}/logs:/opt/sonarqube/logs
+      - ${SONARQUBE_DATA_PATH}/temp:/opt/sonarqube/temp
+
+    networks:
+      - sonarqube
+
+
+secrets:
+  postgres_password:
+    file: ${POSTGRES_PASSWORD_FILE}
+
+
+networks:
+  sonarqube:
+    driver: bridge

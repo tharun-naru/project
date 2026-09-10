@@ -109,6 +109,8 @@ module "eks" {
 
   environment = var.environment
 
+  region = var.region
+
   vpc_id = module.networking.vpc_id
 
   private_subnet_ids = module.networking.private_subnet_ids
@@ -164,6 +166,58 @@ module "eks" {
 
 }
 ############################################
+# AWS Load Balancer Controller
+############################################
+
+module "load_balancer_controller" {
+
+  source = "../../modules/runtime/load-balancer-controller"
+  providers = {
+    helm = helm
+  }
+  ##########################################
+  # Project
+  ##########################################
+
+  project_name = var.project_name
+
+  environment = var.environment
+
+  common_tags = var.common_tags
+  ##########################################
+  # EKS
+  ##########################################
+
+  cluster_name = module.eks.cluster_name
+  vpc_id       = module.networking.vpc_id
+
+
+  ##########################################
+  # Existing IRSA Role
+  ##########################################
+
+  irsa_role_arn = module.eks.irsa_role_arns[
+    "aws-load-balancer-controller"
+  ]
+  namespace = "kube-system"
+
+  service_account_name = "aws-load-balancer-controller"
+  ##########################################
+  # Helm
+  ##########################################
+  helm_repository = var.load_balancer_controller_helm_repository
+
+  chart_name = var.load_balancer_controller_chart_name
+
+  chart_version    = var.aws_load_balancer_controller_chart_version
+  create_namespace = false
+
+  depends_on = [
+    module.eks
+  ]
+
+}
+############################################
 # RDS 
 ############################################
 
@@ -215,4 +269,23 @@ module "rds" {
   private_subnet_ids = module.networking.private_subnet_ids
 
   parameter_group_family = var.rds.parameter_group_family
+  security_group_ingress = {
+
+    sonarqube_psql = {
+
+      description = "Allow MySQL access from EKS"
+
+      from_port = 3306
+
+      to_port = 3306
+
+      protocol = "tcp"
+
+      security_group_ids = [
+        module.sonarqube.security_group_id
+      ]
+
+    }
+
+  }
 }

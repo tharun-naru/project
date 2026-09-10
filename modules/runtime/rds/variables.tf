@@ -250,7 +250,7 @@ variable "performance_insights_enabled" {
 
   type = bool
 
-  default = true
+  default = false
 
 }
 

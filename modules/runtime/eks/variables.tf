@@ -28,6 +28,9 @@ variable "common_tags" {
 
 }
 
+variable "region" {
+  type = string
+}
 ############################################
 # Networking
 ############################################

@@ -111,7 +111,7 @@ variable "iam_roles" {
 
     managed_policy_arns = optional(list(string), [])
 
-    custom_policy_documents = optional(map(string), {})
+    policy_names = optional(list(string), [])
 
     create_instance_profile = optional(bool, false)
 
@@ -220,7 +220,7 @@ variable "ecr_repositories" {
 
     force_delete = optional(
       bool,
-      false
+      true
     )
 
     encryption_type = optional(
@@ -540,6 +540,34 @@ variable "cluster_log_kms_key_arn" {
 
 }
 ############################################
+# LBcontroller
+############################################
+variable "load_balancer_controller_helm_repository" {
+
+  description = "Helm repository for AWS Load Balancer Controller"
+
+  type = string
+
+  default = "https://aws.github.io/eks-charts"
+
+}
+variable "load_balancer_controller_chart_name" {
+
+  description = "AWS Load Balancer Controller Helm chart"
+
+  type = string
+
+  default = "aws-load-balancer-controller"
+
+}
+variable "aws_load_balancer_controller_chart_version" {
+
+  description = "AWS Load Balancer Controller Helm chart version"
+
+  type = string
+
+}
+############################################
 # RDS
 ############################################
 
@@ -586,4 +614,126 @@ variable "rds" {
 
     parameter_group_family = string
   })
+
 }
+############################################
+# Platform
+############################################
+
+# =========================================================
+# ALB Security Group
+# =========================================================
+
+variable "alb_security_group_id" {
+  description = "Security group ID of the shared ALB"
+  type        = string
+  default     = null
+}
+
+# =========================================================
+# Jenkins EC2
+# =========================================================
+
+variable "jenkins_instance_type" {
+  description = "EC2 instance type for Jenkins"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "jenkins_root_volume_size" {
+  description = "Jenkins root EBS volume size in GB"
+  type        = number
+  default     = 20
+}
+
+variable "jenkins_data_volume_size" {
+  description = "Jenkins persistent data EBS volume size in GB"
+  type        = number
+  default     = 50
+}
+
+variable "jenkins_data_volume_type" {
+  description = "Jenkins persistent data EBS volume type"
+  type        = string
+  default     = "gp3"
+}
+
+
+# =========================================================
+# Nexus EC2
+# =========================================================
+
+variable "nexus_instance_type" {
+  description = "EC2 instance type for Nexus"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "nexus_root_volume_size" {
+  description = "Nexus root EBS volume size in GB"
+  type        = number
+  default     = 20
+}
+
+variable "nexus_data_volume_size" {
+  description = "Nexus persistent data EBS volume size in GB"
+  type        = number
+  default     = 100
+}
+
+variable "nexus_data_volume_type" {
+  description = "Nexus persistent data EBS volume type"
+  type        = string
+  default     = "gp3"
+}
+
+
+# =========================================================
+# SonarQube EC2
+# =========================================================
+
+variable "sonarqube_instance_type" {
+  description = "EC2 instance type for SonarQube"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "sonarqube_version" {
+  description = "SonarQube version"
+  type        = string
+  default     = "25.8.0.112058"
+}
+
+variable "sonarqube_root_volume_size" {
+  description = "SonarQube root EBS volume size in GB"
+  type        = number
+  default     = 20
+}
+
+variable "sonarqube_data_volumes" {
+  description = "Persistent EBS volumes for SonarQube and PostgreSQL"
+
+  type = map(object({
+    size        = number
+    type        = string
+    encrypted   = bool
+    device_name = string
+  }))
+}
+
+# =========================================================
+# Monitoring
+# =========================================================
+
+variable "enable_detailed_monitoring" {
+  description = "Enable EC2 detailed monitoring"
+  type        = bool
+  default     = false
+}
+
+variable "cloudwatch_log_retention_days" {
+  description = "CloudWatch log retention period"
+  type        = number
+  default     = 30
+}
+
