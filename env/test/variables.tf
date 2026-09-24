@@ -421,6 +421,7 @@ variable "launch_templates" {
     encrypted = optional(bool, true)
 
     additional_security_group_ids = optional(list(string), [])
+    user_data = optional(string, null)
 
   }))
 

@@ -4,6 +4,8 @@ resource "aws_launch_template" "this" {
 
   name_prefix = "${local.name_prefix}-${each.key}-"
 
+  user_data = each.value.user_data != null ? base64encode(each.value.user_data) : null
+
   block_device_mappings {
 
     device_name = "/dev/xvda"

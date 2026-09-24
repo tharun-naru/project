@@ -12,7 +12,7 @@ terraform {
 
     encrypt = true
 
-    kms_key_id = "arn:aws:kms:ap-south-1:179897609830:key/1b15760b-4547-4e20-bc0b-586f8571468a"
+    kms_key_id = "arn:aws:kms:ap-south-1:179897609830:key/21ccc3dc-931a-4838-9409-59a1041e7690"
 
   }
 

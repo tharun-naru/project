@@ -238,7 +238,9 @@ iam_roles = {
 
     managed_policy_arns = [
       "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-      "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+      "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+      "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+      "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
     ]
 
     create_instance_profile = true
@@ -329,7 +331,7 @@ kms_keys = {
 ############################################
 
 ecr_repositories = {
-
+  images={}
 }
 ############################################
 # EKS
@@ -341,7 +343,7 @@ endpoint_private_access = true
 
 endpoint_public_access = true
 
-public_access_cidrs = ["15.252.142.10/32", "3.108.217.124/32"]
+public_access_cidrs = ["13.214.171.49/32"]
 
 
 eks_node_groups = {
@@ -350,17 +352,17 @@ eks_node_groups = {
 
     instance_types = [
 
-      "t3.medium"
+      "t3.large"
 
     ]
 
     capacity_type = "ON_DEMAND"
 
-    min_size = 0
+    min_size = 1
 
     max_size = 2
 
-    desired_size = 0
+    desired_size = 1
 
     disk_size = 50
 
@@ -397,6 +399,18 @@ eks_access_entries = {
     }
     type = "STANDARD"
   }
+  jenkins = {
+    principal_arn = "arn:aws:iam::179897609830:role/speshway-test-jenkins-role"
+
+    policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+    access_scope = {
+      type       = "cluster"
+      namespaces = []
+    }
+    type = "STANDARD"
+  }
+
   eks_user = {
     principal_arn = "arn:aws:iam::179897609830:user/eks-user"
 
