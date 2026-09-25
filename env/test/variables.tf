@@ -738,3 +738,10 @@ variable "cloudwatch_log_retention_days" {
   default     = 30
 }
 
+#########################################
+#Cloudwatch
+#########################################
+variable "monitoring_alert_email" {
+  description = "Email address for CloudWatch monitoring alerts"
+  type        = string
+}

@@ -240,7 +240,9 @@ iam_roles = {
       "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
       "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
       "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-      "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+      "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser",
+      "arn:aws:iam::aws:policy/AWSSecretsManagerClientReadOnlyAccess",
+      "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
     ]
 
     create_instance_profile = true
@@ -581,8 +583,10 @@ enable_karpenter = false
 cluster_log_types = [
 
   "api",
-
-  "audit"
+  "audit",
+  "authenticator",
+  "controllerManager",
+  "scheduler"
 
 ]
 
@@ -699,3 +703,7 @@ sonarqube_data_volumes = {
 
 enable_detailed_monitoring = false
 
+# =========================================================
+# Cloudwatch
+# =========================================================
+monitoring_alert_email = "ntharun@speshway.com"

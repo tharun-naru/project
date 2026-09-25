@@ -3,13 +3,13 @@
 # ============================================================
 
 data "aws_instance" "jenkins" {
-  instance_id = "i-0c6ff4f0078284f90"
+  instance_id = "i-03966ea3e60255114"
 }
 
 data "aws_instance" "nexus" {
-  instance_id = "i-0bfae1da1b442f38a"
+  instance_id = "i-0f4fdc2923582849e"
 }
 
 data "aws_instance" "sonarqube" {
-  instance_id = "i-068b62fa292d6e255"
+  instance_id = "i-0c8f2b000d444b6ea"
 }

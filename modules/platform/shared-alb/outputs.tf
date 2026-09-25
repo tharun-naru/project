@@ -1,3 +1,7 @@
+output "alb_arn_suffix" {
+  description = "ALB ARN suffix used by CloudWatch metrics"
+  value       = aws_lb.shared.arn_suffix
+}
 output "alb_id" {
   description = "Shared ALB ID"
   value       = aws_lb.shared.id
