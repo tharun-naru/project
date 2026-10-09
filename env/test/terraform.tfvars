@@ -811,6 +811,19 @@ prometheus_instance_type = "t3.medium"
 
 prometheus_root_volume_size = 20
 
+############################################
+# Argo CD
+############################################
+ 
+argocd_helm_repository   	= "https://argoproj.github.io/argo-helm"
+argocd_chart_name        	= "argo-cd"
+argocd_chart_version     	= "10.9.2"
+argocd_git_repository_url	= "https://github.com/tharun-naru/microservicedemo.git"
+argocd_git_target_revision   = "master"
+argocd_git_path          	= "helm/crm"
+argocd_destination_namespace = "default” 
+
+
 prometheus_data_volume_size = 100
 
 prometheus_data_volume_type = "gp3"

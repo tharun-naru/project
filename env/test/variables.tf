@@ -800,3 +800,47 @@ variable "fluent_bit_chart_version" {
   default = null
 
 }
+############################################
+# Argo CD
+############################################
+ 
+variable "argocd_helm_repository" {
+  description = "Argo CD Helm repository"
+  type    	= string
+  default 	= "https://argoproj.github.io/argo-helm"
+}
+ 
+variable "argocd_chart_name" {
+  description = "Argo CD Helm chart name"
+  type    	= string
+  default 	= "argo-cd"
+}
+ 
+variable "argocd_chart_version" {
+  description = "Argo CD Helm chart version"
+  type    	= string
+  default 	= "10.9.2"
+}
+ 
+variable "argocd_git_repository_url" {
+  description = "Git repository containing the Kubernetes Helm chart"
+  type    	= string
+}
+ 
+variable "argocd_git_target_revision" {
+  description = "Git branch used by Argo CD"
+  type    	= string
+  default 	= "master"
+}
+ 
+variable "argocd_git_path" {
+  description = "Path to the Helm chart"
+  type    	= string
+  default 	= "helm/crm"
+}
+ 
+variable "argocd_destination_namespace" {
+  description = "Initial Kubernetes destination namespace"
+  type    	= string
+  default 	= "default"
+} 
